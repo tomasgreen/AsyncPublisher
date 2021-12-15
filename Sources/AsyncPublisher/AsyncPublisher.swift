@@ -1,10 +1,6 @@
 import Combine
 private var cancellables = Set<AnyCancellable?>()
 
-public enum AsyncPublisherError : Error {
-    case probablyCancelled
-}
-
 /// Converts any failing publisher into an async function.
 /// - warning: This function is be used with publishers that finishes once.
 /// - Returns: T
@@ -14,8 +10,6 @@ public func makeAsync<T:Any>(_ publisher:AnyPublisher<T,Error>) async throws -> 
         p = publisher.sink { compl in
             if case let .failure(err) = compl {
                 continuation.resume(throwing: err)
-            } else {
-                continuation.resume(throwing: AsyncPublisherError.probablyCancelled)
             }
             cancellables.remove(p)
         } receiveValue: { val in
