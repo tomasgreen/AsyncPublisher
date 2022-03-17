@@ -43,4 +43,19 @@ final class AsyncPublisherTests: XCTestCase {
         let val2 = try await makeAsync(publisherStringErrorFinishing(string:testString))
         XCTAssert(testString == val2)
     }
+    func testStream() async {
+        let subj = PassthroughSubject<String,Never>()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+            subj.send("test1")
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
+            subj.send("test2")
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
+            subj.send(completion: .finished)
+        }
+        for await str in makeAsyncStream(subj.eraseToAnyPublisher()) {
+            print(str)
+        }
+    }
 }
